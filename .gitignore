@@ -1,5 +1,4 @@
 # Reminder to read someone else's .gitignore file to learn of any conventions
 
-__pycache__
-
+__pycache__/
 test.py
