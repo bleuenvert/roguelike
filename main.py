@@ -2,15 +2,23 @@
 
 import tcod
 
-from actions import EscapeAction, MovementAction
+from engine import Engine
 from entity import Entity
+from game_map import GameMap
 from input_handlers import EventHandler
 
 def main():
-    # are these characters across? certainly not pixels
+    # in character size. tcod definitely made with rogue in mind!
     screen_width = 80
     screen_height = 50
 
+    map_width = 80
+    map_height = 45
+    
+    # colors for syntactic sugar
+    #           R    G    B
+    WHITE  = (255, 255, 255)
+    YELLOW = (255, 255,   0)
 
     # sets tileset to the image downloaded.
     tileset = tcod.tileset.load_tilesheet(
@@ -19,10 +27,17 @@ def main():
 
     #save event handler function as a variable
     event_handler = EventHandler()
-
-    player = Entity(int(screen_width / 2), int(screen_height / 2), "@", (255, 255, 255))
-    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2 - 5), "@", (255, 255, 0 ))
+    
+    # defines objects in terms of Entity class
+    player = Entity(int(screen_width / 2), int(screen_height / 2), "@", WHITE)
+    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), "@", YELLOW)
     entities = {npc, player}
+    
+    # game map variable
+    game_map = GameMap(map_width, map_height)
+
+    #init engine as Engine class
+    engine = Engine(entities=entities, event_handler=event_handler, game_map=game_map, player=player)
 
     # saves some information into a variable 'context'
     with tcod.context.new_terminal(
@@ -39,28 +54,12 @@ def main():
             # main game loop
             while True:
 
-                root_console.print(x=player.x, y=player.y, string=player.char, fg=player.color)
-                #This actually "prints" the console. (recall pygame.display.update())    
-                context.present(root_console)
-                # clears the console so not leave old positions drawn
-                root_console.clear()
+                engine.render(console=root_console, context=context)
 
-                #event handling!
-                # tcod.event.wait() waits for an event, and then runs through the loop.
-                for event in tcod.event.wait():
-                    # sends event to the relevant part of event.handler (ie ev_keydown for keypresses)
-                    action = event_handler.dispatch(event)
+                events = tcod.event.wait()
 
-                    # ignore actions that are not handled yet
-                    if action == None:
-                        continue
-                        
-                    # isinstance checks if action is an instantiation of Movement Action (check isinstance(5, int)
-                    if isinstance(action, MovementAction):
-                        player.move(dx=action.dx, dy=action.dy)
+                engine.handle_events(events)
 
-                    elif isinstance(action, EscapeAction):
-                        raise SystemExit()
 
 
 
