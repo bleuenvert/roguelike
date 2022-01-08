@@ -1,4 +1,8 @@
-# Reminder to read someone else's .gitignore file to learn of any conventions
+### Reminder to read someone else's .gitignore file to learn of any conventions
 
-'__pycache__'
-'test.py'
+
+# startup binaries
+__pycache__
+
+# just a test program to see if tcod is working
+test.py
